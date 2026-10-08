@@ -1,26 +1,77 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Single source of truth for the design tokens.
+ * Never hardcode hex values in components — use the Tailwind classes
+ * these tokens generate (bg-primary, text-muted, bg-button, ...).
+ */
+@theme {
+  /* Brand */
+  --color-primary: #0065fd;
+  --color-primary-hover: #0057d6;
+  --color-primary-light: #e6f0ff;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Buttons */
+  --color-button: #006aff;
+  --color-button-hover: #005ce0;
+  --color-button-active: #004fc2;
+  --color-button-disabled: #99c3ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Text */
+  --color-foreground: #111827;
+  --color-muted: #6b7280;
+  --color-placeholder: #9ca3af;
+
+  /* Surfaces & borders */
+  --color-background: #ffffff;
+  --color-surface: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-overlay: rgb(0 0 0 / 0.35);
+
+  /* Status */
+  --color-success: #16a34a;
+  --color-success-light: #dcfce7;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-light: #fee2e2;
+
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Window grid drawn on the faces of the 3D buildings (auth showcase). */
+.iso-windows {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 11px,
+      color-mix(in srgb, var(--color-primary) 24%, transparent) 11px 13px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 15px,
+      color-mix(in srgb, var(--color-primary) 24%, transparent) 15px 17px
+    );
+}
+
+/* Toast auto-dismiss progress bar (drains left to right). */
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.toast-progress {
+  animation-name: toast-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
