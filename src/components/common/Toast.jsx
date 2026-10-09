@@ -2,17 +2,32 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, X } from "lucide-react";
+import { Check, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Success follows the brand blue, error uses the danger red.
 const STYLES = {
-  success: { icon: Check, dot: "bg-success", bar: "bg-success" },
-  error: { icon: X, dot: "bg-danger", bar: "bg-danger" },
+  success: {
+    icon: Check,
+    title: "text-primary",
+    blob: "bg-primary/10",
+    badge: "bg-primary ring-primary/10",
+    bar: "bg-primary",
+    border: "border-primary/10",
+  },
+  error: {
+    icon: TriangleAlert,
+    title: "text-danger",
+    blob: "bg-danger/10",
+    badge: "bg-danger ring-danger/10",
+    bar: "bg-danger",
+    border: "border-danger/10",
+  },
 };
 
 /**
- * Clean toast: white card, small coloured status dot, title + message, thin drain bar.
- * Hover pauses the timer and the bar.
+ * Brand toast: white card, soft coloured blobs, solid icon badge with a soft fade-in,
+ * coloured title and a rounded drain bar. Slides in from the right; hover pauses everything.
  */
 export default function Toast({ toast, onDismiss }) {
   const { type, title, message, duration } = toast;
@@ -42,42 +57,63 @@ export default function Toast({ toast, onDismiss }) {
     <motion.div
       layout
       role={type === "error" ? "alert" : "status"}
-      initial={{ opacity: 0, y: -12, scale: 0.97 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.15 } }}
-      transition={{ type: "spring", stiffness: 420, damping: 32 }}
+      initial={{ opacity: 0, x: 120 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 120, transition: { duration: 0.2 } }}
+      transition={{ type: "spring", stiffness: 340, damping: 30 }}
       onHoverStart={() => setPaused(true)}
       onHoverEnd={() => setPaused(false)}
-      className="pointer-events-auto relative w-full overflow-hidden rounded-xl border border-border bg-background shadow-lg sm:w-[360px]"
+      className={cn(
+        "group/toast pointer-events-auto relative w-[290px] overflow-hidden rounded-xl border bg-background shadow-2xl sm:w-[320px]",
+        style.border,
+      )}
     >
-      <div className="flex items-start gap-3 px-4 py-3.5">
-        <span
+      {/* soft blobs behind the icon (decorative) */}
+      <span
+        className={cn(
+          "pointer-events-none absolute -left-10 top-1/2 h-24 w-24 -translate-y-1/2 rounded-[58%_42%_55%_45%/48%_58%_42%_52%]",
+          style.blob,
+        )}
+      />
+      <span
+        className={cn("pointer-events-none absolute -bottom-8 right-6 h-16 w-16 rounded-full", style.blob)}
+      />
+      <span
+        className={cn("pointer-events-none absolute -right-3 -top-5 h-12 w-12 rounded-full opacity-70", style.blob)}
+      />
+
+      <div className="relative flex min-h-[62px] items-center gap-3 px-3.5 py-2.5 pr-8">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.85 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.25, ease: "easeOut", delay: 0.1 }}
           className={cn(
-            "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white",
-            style.dot,
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white ring-4",
+            style.badge,
           )}
         >
-          <Icon size={12} strokeWidth={3.5} />
-        </span>
+          <Icon size={17} strokeWidth={2.5} />
+        </motion.span>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="text-sm font-semibold leading-tight text-foreground">{title}</p>
-          <p className="text-[13px] leading-snug text-muted">{message}</p>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5">
+          <p className={cn("text-sm font-bold leading-tight", style.title)}>{title}</p>
+          <p className="line-clamp-2 text-xs leading-snug text-muted">{message}</p>
         </div>
 
         <button
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss notification"
-          className="-mr-1 cursor-pointer rounded-md p-1 text-placeholder transition-colors hover:bg-surface hover:text-foreground"
+          className="absolute right-2 top-2 cursor-pointer rounded-md p-1 text-placeholder transition-colors hover:bg-surface hover:text-foreground"
         >
-          <X size={14} />
+          <X size={13} />
         </button>
       </div>
 
-      <div className="h-0.5 w-full bg-surface">
+      {/* drain bar */}
+      <div className="mx-3.5 mb-2 h-[3px] overflow-hidden rounded-full bg-surface">
         <div
-          className={cn("toast-progress h-full origin-left", style.bar)}
+          className={cn("toast-progress h-full origin-left rounded-full", style.bar)}
           style={{ animationDuration: `${duration}ms`, animationPlayState: paused ? "paused" : "running" }}
         />
       </div>

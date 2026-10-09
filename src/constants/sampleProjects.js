@@ -22,18 +22,66 @@ const unit = (overrides) => ({
   ...overrides,
 });
 
+/** Shared detail fields so every demo project looks complete on its detail page. */
+const DETAILS = {
+  completion: "2027-09",
+  age: "new",
+  facades: ["n", "e"],
+  landAreaFrom: "400",
+  landAreaTo: "900",
+  streetWidthFrom: "15",
+  streetWidthTo: "30",
+  livingFrom: "1",
+  livingTo: "2",
+  floorsFrom: "2",
+  floorsTo: "12",
+  buildingAreaFrom: "180",
+  buildingAreaTo: "520",
+  parking: "yes",
+  parkingSpacesFrom: "1",
+  parkingSpacesTo: "3",
+  furnishing: "furnished",
+  furnishedItems: ["ac", "kitchen", "wardrobes"],
+  warrantyStructure: "10",
+  warrantyStructureUnit: "years",
+  warrantyOther: "Electrical and plumbing 2 years, AC 1 year",
+  otherAmenities: "Walking track, 24/7 maintenance service",
+  nearby: { mosque: "3", school: "6", hospital: "9", mall: "12", park: "5", transit: "10" },
+  cashDownPayment: "20",
+  cashDiscount: "5",
+  cashInstallmentMonths: "36",
+  bankNames: "Al Rajhi Bank, Riyad Bank",
+  bankDownPayment: "10",
+  bankMaxYears: "25",
+  sakani: "yes",
+  adExpiry: "2027-03-31",
+  wafiExpiry: "2027-06-30",
+  adFile: { name: "rega-advertising-license.pdf" },
+  wafiFile: { name: "wafi-sales-license.pdf" },
+  floorPlans: { name: "floor-plans.pdf" },
+  brochure: { name: "project-brochure.pdf" },
+  authName: "Marketing authorization letter",
+  authExpiry: "2027-12-31",
+  authFile: { name: "developer-authorization.pdf" },
+  devName: "Verified Developer 1",
+  video: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  tour: "https://my.matterport.com/show/?m=demo",
+};
+
 const make = (id, status, daysAgo, values) => ({
   id: `sample-${id}`,
   sample: true,
   status,
   createdAt: now - (daysAgo + 10) * DAY,
   updatedAt: now - daysAgo * DAY,
-  values: { ...INITIAL_PROJECT_FORM, ...values },
+  values: { ...INITIAL_PROJECT_FORM, ...DETAILS, ...values },
 });
 
 export const SAMPLE_PROJECTS = [
   make("noor", "approved", 2, {
     name: "Al Noor Residences",
+    description: "A modern residential community of apartments and villas with landscaped courtyards, private parking and 24/7 security, minutes from the business district.",
+    address: "Prince Mohammed bin Abdulaziz Rd, Al Olaya, Riyadh",
     companyType: "developer",
     types: ["apartments", "villa"],
     status: "under",
@@ -53,6 +101,8 @@ export const SAMPLE_PROJECTS = [
   }),
   make("palm", "approved", 6, {
     name: "Palm Gardens Villas",
+    description: "Move-in ready family villas set around palm-lined streets, with private gardens, a clubhouse and a play area for children.",
+    address: "Al Rawdah District, Jeddah",
     companyType: "broker",
     types: ["villa"],
     status: "ready",
@@ -70,6 +120,8 @@ export const SAMPLE_PROJECTS = [
   }),
   make("plots", "approved", 14, {
     name: "Desert Bloom Plots",
+    description: "Fully serviced residential plots with paved roads, utilities and an approved master plan, ready for immediate building.",
+    address: "Al Bujairi, Diriyah",
     companyType: "developer",
     types: ["land"],
     status: "ready",
@@ -87,6 +139,8 @@ export const SAMPLE_PROJECTS = [
   }),
   make("skyline", "review", 1, {
     name: "Skyline Towers",
+    description: "High-rise apartment towers with panoramic views, a fitness club and retail podium, financed through leading banks.",
+    address: "King Fahd Rd, Al Faisaliyah, Dammam",
     companyType: "developer",
     types: ["apartments"],
     status: "under",
@@ -105,6 +159,8 @@ export const SAMPLE_PROJECTS = [
   }),
   make("green", "review", 3, {
     name: "Green Valley Townhouses",
+    description: "Contemporary townhouses in a gated green community, with shared gardens, a sports court and smart home features.",
+    address: "Hittin District, Riyadh",
     companyType: "broker",
     types: ["townhouse"],
     status: "soon",

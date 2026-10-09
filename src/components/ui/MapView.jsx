@@ -37,16 +37,19 @@ function applyEnglishLabels(map) {
 /**
  * Vector map (MapLibre + OpenFreeMap) with one draggable pin, labels in English.
  * lat/lng: current pin (numbers) or null.  onChange({ lat, lng }) on map click / pin drag.
+ * `readOnly` shows a fixed pin only (no click/drag, no location prompt).
  * On first load the map centres on the browser location (if allowed and no pin yet).
  * MapLibre touches `window`, so it is loaded inside an effect (client only).
  */
-export default function MapView({ lat, lng, onChange, onLocate, className }) {
+export default function MapView({ lat, lng, onChange, onLocate, readOnly = false, className }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const onChangeRef = useRef(onChange);
   const onLocateRef = useRef(onLocate);
   const hasPinRef = useRef(lat !== null && lng !== null);
+  const latRef = useRef(lat);
+  const lngRef = useRef(lng);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -54,6 +57,8 @@ export default function MapView({ lat, lng, onChange, onLocate, className }) {
     onChangeRef.current = onChange;
     onLocateRef.current = onLocate;
     hasPinRef.current = lat !== null && lng !== null;
+    latRef.current = lat;
+    lngRef.current = lng;
   }, [onChange, onLocate, lat, lng]);
 
   // Create the map once.
@@ -67,30 +72,36 @@ export default function MapView({ lat, lng, onChange, onLocate, className }) {
       .then((mod) => {
       const maplibre = mod.default ?? mod;
       if (cancelled || !containerRef.current) return;
+      const hasInitialPin = hasPinRef.current;
       map = new maplibre.Map({
         container: containerRef.current,
         style: STYLE_URL,
-        center: DEFAULT_CENTER,
-        zoom: DEFAULT_ZOOM,
+        center: readOnly && hasInitialPin ? [lngRef.current, latRef.current] : DEFAULT_CENTER,
+        zoom: readOnly && hasInitialPin ? PIN_ZOOM : DEFAULT_ZOOM,
       });
       map.addControl(new maplibre.NavigationControl({ showCompass: false }), "top-right");
-      const locate = new maplibre.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        fitBoundsOptions: { maxZoom: LOCATE_ZOOM },
-        showAccuracyCircle: false,
-      });
-      map.addControl(locate, "top-right");
-      locate.on("geolocate", (e) =>
-        onLocateRef.current?.({ lat: e.coords.latitude, lng: e.coords.longitude }),
-      );
+      let locate = null;
+      if (!readOnly) {
+        locate = new maplibre.GeolocateControl({
+          positionOptions: { enableHighAccuracy: true },
+          fitBoundsOptions: { maxZoom: LOCATE_ZOOM },
+          showAccuracyCircle: false,
+        });
+        map.addControl(locate, "top-right");
+        locate.on("geolocate", (e) =>
+          onLocateRef.current?.({ lat: e.coords.latitude, lng: e.coords.longitude }),
+        );
+      }
       map.on("style.load", () => applyEnglishLabels(map));
-      map.on("click", (e) => onChangeRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }));
+      if (!readOnly) {
+        map.on("click", (e) => onChangeRef.current?.({ lat: e.lngLat.lat, lng: e.lngLat.lng }));
+      }
       map.once("load", () => {
         if (cancelled) return;
         clearTimeout(timeout);
         setReady(true);
         // Start on the user's current location (asks for browser permission) unless a pin exists.
-        if (!hasPinRef.current) locate.trigger();
+        if (locate && !hasPinRef.current) locate.trigger();
       });
       mapRef.current = { maplibre, map };
       })
@@ -104,7 +115,7 @@ export default function MapView({ lat, lng, onChange, onLocate, className }) {
       mapRef.current = null;
       markerRef.current = null;
     };
-  }, []);
+  }, [readOnly]);
 
   // Keep the pin in sync with lat/lng.
   useEffect(() => {
@@ -120,7 +131,7 @@ export default function MapView({ lat, lng, onChange, onLocate, className }) {
     if (!markerRef.current) {
       const element = document.createElement("div");
       element.innerHTML = PIN_HTML;
-      const marker = new maplibre.Marker({ element, anchor: "bottom", draggable: true })
+      const marker = new maplibre.Marker({ element, anchor: "bottom", draggable: !readOnly })
         .setLngLat([lng, lat])
         .addTo(map);
       marker.on("dragend", () => {
@@ -132,8 +143,12 @@ export default function MapView({ lat, lng, onChange, onLocate, className }) {
       markerRef.current.setLngLat([lng, lat]);
     }
 
-    map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), PIN_ZOOM), duration: 800 });
-  }, [ready, lat, lng]);
+    map.flyTo({
+      center: [lng, lat],
+      zoom: Math.max(map.getZoom(), PIN_ZOOM),
+      duration: readOnly ? 0 : 800,
+    });
+  }, [ready, lat, lng, readOnly]);
 
   return (
     <div className={cn("relative isolate overflow-hidden bg-surface", className)}>

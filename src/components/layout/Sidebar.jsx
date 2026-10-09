@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { ConfirmModal } from "@/components/common";
 import Tooltip from "@/components/ui/Tooltip";
 import SidebarItem from "@/components/layout/SidebarItem";
 import { DEFAULT_TAB, LOGOS, NAV_ITEMS } from "@/constants/navigation";
@@ -26,6 +28,14 @@ export default function Sidebar({
 }) {
   const { activeTab, setActiveTab } = useActiveTab();
   const toast = useToast();
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
+  const confirmLogout = () => {
+    setLogoutOpen(false);
+    onMobileClose();
+    authService.logout();
+    toast.success("You have been logged out.", { title: "See you soon" });
+  };
 
   // Clicking empty sidebar space (not a tab/button/link) toggles collapse on desktop.
   const handleAsideClick = (e) => {
@@ -140,14 +150,22 @@ export default function Sidebar({
               item={LOGOUT_ITEM}
               collapsed={collapsed}
               active={false}
-              onSelect={() => {
-                authService.logout();
-                toast.success("You have been logged out.", { title: "See you soon" });
-              }}
+              onSelect={() => setLogoutOpen(true)}
             />
           </ul>
         </div>
       </aside>
+
+      {/* Outside the <aside> so its transform never affects the modal's fixed position. */}
+      <ConfirmModal
+        open={logoutOpen}
+        icon={LogOut}
+        title="Log out?"
+        message={"You will need to log in again to access your projects."}
+        confirmLabel="Log out"
+        onConfirm={confirmLogout}
+        onCancel={() => setLogoutOpen(false)}
+      />
     </>
   );
 }

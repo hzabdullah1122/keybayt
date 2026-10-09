@@ -8,6 +8,7 @@ import AddProjectPanel from "@/components/projects/AddProjectPanel";
 import ProjectsTabs from "@/components/projects/ProjectsTabs";
 import SubmitRequirementsModal from "@/components/projects/SubmitRequirementsModal";
 import ProjectsTable from "@/components/projects/list/ProjectsTable";
+import ProjectDetailView from "@/components/projects/detail/ProjectDetailView";
 import { PROJECT_STEPS } from "@/constants/projects";
 import { useProjectForm } from "@/hooks/useProjectForm";
 import { useProjectsStore } from "@/hooks/useProjectsStore";
@@ -25,7 +26,8 @@ export default function ProjectsView() {
   const store = useProjectsStore();
   const toast = useToast();
 
-  const [mode, setMode] = useState("list"); // "list" | "add"
+  const [mode, setMode] = useState("list"); // "list" | "add" | "detail"
+  const [viewingId, setViewingId] = useState(null);
   const [tab, setTab] = useState("all");
   const [stepId, setStepId] = useState(FIRST_STEP);
   const [editingId, setEditingId] = useState(null);
@@ -95,6 +97,7 @@ export default function ProjectsView() {
     try {
       await store.remove(toDelete.id);
       if (toDelete.id === editingId) startFresh();
+      if (toDelete.id === viewingId) setMode("list");
       toast.success("Draft deleted.");
     } catch (err) {
       showError(err, "Could not delete the draft.");
@@ -141,9 +144,17 @@ export default function ProjectsView() {
     return null;
   };
 
+  const viewingProject = store.all.find((p) => p.id === viewingId) ?? null;
+
   return (
     <div className="mx-auto flex w-full max-w-[1680px] flex-1 flex-col gap-5">
-      {mode === "list" ? (
+      {mode === "detail" && viewingProject ? (
+        <ProjectDetailView
+          project={viewingProject}
+          onBack={() => setMode("list")}
+          actions={renderActions(viewingProject)}
+        />
+      ) : mode === "list" || mode === "detail" ? (
         <>
           <ProjectsTabs
             value={tab}
@@ -168,6 +179,10 @@ export default function ProjectsView() {
             error={store.error}
             onRetry={store.refresh}
             onAdd={() => setMode("add")}
+            onOpen={(project) => {
+              setViewingId(project.id);
+              setMode("detail");
+            }}
             renderActions={renderActions}
           />
         </>

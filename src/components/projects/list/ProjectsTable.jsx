@@ -32,7 +32,16 @@ function RowsShimmer() {
 }
 
 /** Project list for one tab: header + rows with loading / error / empty handled. */
-export default function ProjectsTable({ tabId, projects, loading, error, onRetry, onAdd, renderActions }) {
+export default function ProjectsTable({
+  tabId,
+  projects,
+  loading,
+  error,
+  onRetry,
+  onAdd,
+  onOpen,
+  renderActions,
+}) {
   const emptyCopy = PROJECT_EMPTY_STATES[tabId];
 
   return (
@@ -59,7 +68,12 @@ export default function ProjectsTable({ tabId, projects, loading, error, onRetry
       <div className="flex flex-col gap-3">
         <TableHeader />
         {projects.map((project) => (
-          <ProjectRow key={project.id} project={project} actions={renderActions(project)} />
+          <ProjectRow
+            key={project.id}
+            project={project}
+            actions={renderActions(project)}
+            onOpen={() => onOpen(project)}
+          />
         ))}
       </div>
     </DataState>

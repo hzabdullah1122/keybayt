@@ -7,7 +7,7 @@ const ToastContext = createContext(null);
 
 const MAX_TOASTS = 4;
 const DEFAULT_DURATION = { success: 4000, error: 6000 };
-const DEFAULT_TITLE = { success: "Success", error: "Something went wrong" };
+const DEFAULT_TITLE = { success: "Success!", error: "Error!" };
 
 let nextId = 1;
 

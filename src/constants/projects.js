@@ -233,8 +233,6 @@ export const INITIAL_PROJECT_FORM = {
   brochure: null,
 };
 
-/** Placeholder until the signed-in company comes from auth. */
-export const CURRENT_COMPANY_NAME = "[Your company name]";
 
 /** Top-level tabs of the Projects page. `status` links a tab to saved project status. */
 export const PROJECT_TABS = [

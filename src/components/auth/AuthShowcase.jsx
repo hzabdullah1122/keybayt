@@ -13,14 +13,20 @@ import { MapPin, Sparkles, Tag, UserRoundCheck } from "lucide-react";
 import FloatingDots from "@/components/auth/FloatingDots";
 import FloatingCard from "@/components/auth/FloatingCard";
 import IsoScene from "@/components/auth/IsoScene";
+import { useFitScale } from "@/hooks/useFitScale";
 import { LOGOS } from "@/constants/navigation";
 import { SHOWCASE_STATS } from "@/constants/auth";
 
 const SPRING = { stiffness: 90, damping: 18, mass: 0.6 };
 
+// Size the panel content is designed for; on smaller panels everything is scaled down to fit.
+const BASE_WIDTH = 620;
+const BASE_HEIGHT = 860;
+
 /** Blue brand panel: 3D city block that tilts with the mouse + floating product cards. */
 export default function AuthShowcase() {
   const reduceMotion = useReducedMotion();
+  const { ref, scale, ready } = useFitScale({ baseWidth: BASE_WIDTH, baseHeight: BASE_HEIGHT });
 
   // Pointer position inside the panel, -0.5 .. 0.5
   const px = useMotionValue(0);
@@ -53,9 +59,10 @@ export default function AuthShowcase() {
 
   return (
     <div
+      ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className="relative flex h-full flex-col justify-between overflow-hidden rounded-[32px] bg-primary p-10 text-white 2xl:p-14"
+      className="relative h-full overflow-hidden rounded-[32px] bg-primary text-white"
     >
       {/* soft light + grid backdrop */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_10%,var(--color-primary-hover),transparent_55%)]" />
@@ -67,6 +74,18 @@ export default function AuthShowcase() {
         <motion.div className="pointer-events-none absolute inset-0" style={{ background: glare }} />
       )}
 
+      {/* All content lives in one block that is scaled to the panel size (no scrolling). */}
+      <div
+        className="relative z-10 flex flex-col justify-between p-10 2xl:p-14"
+        style={{
+          width: `${100 / scale}%`,
+          height: `${100 / scale}%`,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          opacity: ready ? 1 : 0,
+          transition: "opacity 0.3s",
+        }}
+      >
       <div className="relative z-10">
         <Image
           src={LOGOS.completeWhite}
@@ -80,7 +99,7 @@ export default function AuthShowcase() {
 
       {/* 3D scene + floating cards */}
       <div className="relative z-10 flex flex-1 items-center justify-center py-6">
-        <div className="relative scale-[0.72] xl:scale-[0.86] 2xl:scale-100">
+        <div className="relative">
           <IsoScene rotateX={reduceMotion ? 0 : rotateX} rotateY={reduceMotion ? 0 : rotateY} />
 
           {/* map pin hovering over the tallest tower */}
@@ -183,6 +202,7 @@ export default function AuthShowcase() {
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );

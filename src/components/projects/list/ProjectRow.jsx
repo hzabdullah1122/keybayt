@@ -29,7 +29,7 @@ function Cell({ label, children }) {
 const Muted = ({ children }) => <span className="text-muted">{children}</span>;
 
 /** One project as a table row (xl) / stacked card (smaller screens). `actions` = buttons. */
-export default function ProjectRow({ project, actions }) {
+export default function ProjectRow({ project, actions, onOpen }) {
   const { values, status, updatedAt, sample } = project;
   const isBroker = values.companyType === "broker";
   const CompanyIcon = isBroker ? Handshake : Building2;
@@ -48,7 +48,17 @@ export default function ProjectRow({ project, actions }) {
 
   return (
     <article
-      className={`grid grid-cols-2 gap-x-4 gap-y-4 rounded-2xl border border-border bg-background p-4 transition-colors hover:border-primary/40 sm:grid-cols-3 ${ROW_GRID}`}
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onOpen?.();
+        }
+      }}
+      aria-label={`Open ${values.name || "project"}`}
+      className={`cursor-pointer outline-none focus-visible:border-primary grid grid-cols-2 gap-x-4 gap-y-4 rounded-2xl border border-border bg-background p-4 transition-colors hover:border-primary/40 sm:grid-cols-3 ${ROW_GRID}`}
     >
       {/* Project */}
       <div className="col-span-2 flex min-w-0 items-center gap-3.5 sm:col-span-3 xl:col-span-1">
@@ -56,7 +66,7 @@ export default function ProjectRow({ project, actions }) {
           src={values.cover?.url}
           alt={values.name || "Project cover"}
           className="h-14 w-14 shrink-0 rounded-xl"
-          preview={Boolean(values.cover)}
+          preview={false}
           fallbackIcon={HiOutlineBuildingLibrary}
         />
         <div className="flex min-w-0 flex-col gap-0.5">
@@ -120,7 +130,10 @@ export default function ProjectRow({ project, actions }) {
         </div>
       </Cell>
 
-      <div className="col-span-2 flex items-center justify-end gap-2 sm:col-span-3 xl:col-span-1">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="col-span-2 flex items-center justify-end gap-2 sm:col-span-3 xl:col-span-1"
+      >
         {actions}
       </div>
     </article>

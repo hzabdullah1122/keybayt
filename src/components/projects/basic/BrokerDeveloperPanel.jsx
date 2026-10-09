@@ -3,11 +3,13 @@
 import { MessageSquareText } from "lucide-react";
 import { DatePicker, FieldLabel, FileButton, Input, NumberInput, SearchableSelect, SegmentedControl } from "@/components/ui";
 import FieldHint from "@/components/projects/shared/FieldHint";
-import { CURRENT_COMPANY_NAME, DEVELOPER_OPTIONS, DEVELOPER_SOURCES } from "@/constants/projects";
+import { DEVELOPER_OPTIONS, DEVELOPER_SOURCES } from "@/constants/projects";
+import { useCurrentCompany } from "@/hooks/useCurrentCompany";
 
 /** Brokerage view: pick/enter the developer + upload the developer's authorization. */
 export default function BrokerDeveloperPanel({ form }) {
   const { values, set } = form;
+  const company = useCurrentCompany();
 
   return (
     <div className="flex flex-col gap-5 rounded-xl border border-primary/30 bg-primary-light/50 p-5">
@@ -91,7 +93,7 @@ export default function BrokerDeveloperPanel({ form }) {
       <div className="flex items-start gap-2.5 rounded-lg border border-border bg-background px-3.5 py-3 text-sm leading-relaxed text-foreground">
         <MessageSquareText size={18} className="mt-0.5 shrink-0 text-primary" />
         <span>
-          Marketed by <strong>{CURRENT_COMPANY_NAME}</strong>. Customer requests for this listing
+          Marketed by <strong>{company}</strong>. Customer requests for this listing
           reach KeyBayt first and are then forwarded to your company.
         </span>
       </div>
